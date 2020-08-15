@@ -1,0 +1,12 @@
+{
+  "name": "gallery_rails_api_react",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:Dijinio/gallery_rails_api_react.git",
+  "author": "dijinio <dijinio@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "client-install": "yarn --prefix client",
+    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=true YARN_PRODUCTION=true"
+  }
+}

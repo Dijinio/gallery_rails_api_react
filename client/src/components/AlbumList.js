@@ -9,7 +9,7 @@ function AlbumList() {
   }
 
   return (
-    <div>
+    <div className="container">
       <h1>Albums</h1>
       <button onClick={handleClick}>Get Albums</button>
     </div>

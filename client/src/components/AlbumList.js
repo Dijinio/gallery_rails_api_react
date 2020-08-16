@@ -16,4 +16,4 @@ function AlbumList() {
   )
 }
 
-export default AlbumList
+export default AlbumList;

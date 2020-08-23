@@ -1,53 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import Axios from 'axios';
-import ImageUploader from './ImageUploader';
+import React, { useState, useContext, useEffect } from 'react';
 import '../style/newAlbum.scss';
+import { GlobalContext } from '../context/GlobalState';
+import { Link } from 'react-router-dom';
 
 function NewAlbum() {
-  const [albums, setAlbums] = useState([{}]);
+  const { albums, selectedAlbum, selectAlbum } = useContext(GlobalContext);
   const [name, setName] = useState("");
-  const [selectedAlbum, setSelectedAlbum] = useState({});
-  const [albumReady, setAlbumReady] = useState(false);
 
   useEffect(() => {
-    Axios.get('/api/v1/albums')
-    .then(res => {
-      setAlbums(res.data.albums);
-      setSelectedAlbum(res.data.albums[0]);
-    });
-  }, []);
-
-  function handleSubmit(e) {
-    e.preventDefault();
-
-    if (name.length > 0) {
-      Axios.post('/api/v1/albums', {
-        name
-      })
-      .then(res => {
-        const album = res.data.album;
-        setSelectedAlbum({ id: album.id, name: album.name });
-      });
+    if (albums.length > 0 && !selectedAlbum.name) {
+      selectAlbum({ name: albums[0].name });
     }
+  }, [albums]);
 
-    setName("");
-    setAlbumReady(true);
+  const handleContinue = () => {
+    if (name.length > 0) {
+      selectAlbum({ name });
+    }
   }
 
   return (
-    <div className="new-album">
-        <div className={`album-form ${albumReady ? 'active' : ''}`}>
-          <form>
+    <>
+    <h3 className="text-center mt-5">Upload Photos in</h3>
+    <h2 className="text-center">{name ? name : selectedAlbum.name}</h2>
+    <div className="new-album mt-2">
+        <div className='album-form'>
           <label htmlFor="existing-album">Choose an Existing Album</label>
           <select
+            defaultValue={selectedAlbum.name}
             id="existing-album"
             className="form-control"
-            onChange={(e) => setSelectedAlbum(e.target.value)}>
-            {albums.map(album => {
-              return (<option key={album.id} value={album}>{album.name}</option>)
+            onChange={ (e) => selectAlbum({ name: e.target.value }) }>
+            {albums.map((album, index) => {
+              return (<option key={index} value={album.name}>{album.name}</option>)
             })}
           </select>
-          <p>or</p>
+          <p className="text-center mt-3">or</p>
           <label htmlFor="new-album">Create New Album</label>
           <input
             type="text"
@@ -56,11 +44,14 @@ function NewAlbum() {
             placeholder="nature, animals, etc..."
             value={name}
             onChange={(e) => setName(e.target.value)}/>
-          <input type="submit" value="continue" className="btn btn-primary" onClick={handleSubmit} />
-        </form>
+          <Link
+            to='/add_photos'
+            className="btn btn-primary btn-block mt-3"
+            onClick={handleContinue}>
+            Continue</Link>
         </div>
-        <ImageUploader album={selectedAlbum} albumReady={albumReady}/>
     </div>
+    </>
   )
 }
 

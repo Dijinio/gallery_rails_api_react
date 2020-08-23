@@ -1,16 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import Axios from 'axios';
+import React, { useState, useEffect, useContext } from 'react';
+import { Link } from 'react-router-dom';
+import { GlobalContext } from '../context/GlobalState';
 
-function ImageUploader({ album, albumReady }) {
+function ImageUploader() {
   const fileTypes = ["image/png", "image/jpeg", "image/jpg"];
+
+  const { selectedAlbum, uploadFiles } = useContext(GlobalContext);
+
+  const [previewSource, setPreviewSource] = useState([]);
   const [images, setImages] = useState([]);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   useEffect(() => {
-  }, [images])
+    // console.log(uploading)
+  })
 
-  function handleFiles(e) {
-    const files = document.getElementById('file-uploader').files;
+  const handleFiles = (e) => {
+    setError('');
+    const files = e.target.files;
+    previewFiles(files);
     const selectedImages = [];
 
     Array.from(files).forEach(file => {
@@ -24,28 +32,29 @@ function ImageUploader({ album, albumReady }) {
     setImages(selectedImages);
   }
 
-  function handleSubmit(e) {
+  const previewFiles = (files) => {
+    const prevSources = [];
+
+    for (let file of files) {
+      prevSources.push(URL.createObjectURL(file));
+    }
+
+    setPreviewSource(prevSources);
+  }
+
+  const handleSubmitFiles = (e) => {
     e.preventDefault();
 
-    const formData = new FormData();
-
-    formData.append('album_id', album.id);
-
-    Array.from(images).forEach(image => {
-      formData.append("images[]", image);
-    })
-
-
-    Axios.put('/api/v1/albums/:id', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    }).then(res => console.log(res))
+    uploadFiles(images);
   }
 
   return (
-    <div className={`image-uploader ${albumReady ? 'active' : ''}`}>
-      <a href="/" className="nav-link">Back</a>
-      <h1 className="text-center">{album.name}</h1>
-      <form>
+    <div className='image-uploader'>
+      <h3 className="text-center mt-5">Upload Photos in</h3>
+      <h2 className="text-center">{selectedAlbum.name}</h2>
+      <Link to='/new_album'
+        className="btn btn-link mb-2">Back</Link>
+      <form onSubmit={handleSubmitFiles}>
         <label htmlFor="file-uploader">Select images to upload</label>
         <input
           id="file-uploader"
@@ -55,11 +64,18 @@ function ImageUploader({ album, albumReady }) {
           <p className="error">{error}</p>
         <input
           type="submit"
-          className="btn btn-primary"
+          className="btn btn-primary btn-block"
           value="upload files"
-          disabled={(error.length > 0 || images.length < 1) ? true : false}
-          onClick={handleSubmit}/>
+          disabled={(error.length > 0 || images.length < 1) ? true : false}/>
       </form>
+      {(previewSource && previewSource.map((source, index) => (
+          <img
+            src={source}
+            key={index}
+            alt="selected"
+            style={{height: '200px', margin: '5px'}}/>
+        ))
+      )}
     </div>
   )
 }
